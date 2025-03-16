@@ -1,0 +1,17 @@
+# AgriConnect: Agricultural Marketplace Application
+
+## Architecture Overview
+
+```
+┌─────────────────┐           ┌─────────────────┐           ┌─────────────────┐
+│                 │           │                 │           │                 │
+│  Flutter App    │◄─────────►│  Django API     │◄─────────►│  MongoDB        │
+│  (Frontend)     │           │  (Backend)      │           │  (Database)     │
+│                 │           │                 │           │                 │
+└─────────────────┘           └─────────────────┘           └─────────────────┘
+```
+
+- **Frontend**: Flutter mobile application for Android and iOS
+- **Backend**: Django REST API with djangorestframework
+- **Database**: MongoDB with djongo as the connector
+- **Authentication**: JWT-based authentication
