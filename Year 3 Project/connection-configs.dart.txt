@@ -1,0 +1,75 @@
+// Flutter Config - lib/config/api_config.dart
+class ApiConfig {
+  static const String baseUrl = 'http://10.0.2.2:8000'; // For Android emulator
+  // Use 'http://localhost:8000' for iOS simulator
+  // In production, replace with your actual API URL
+  
+  static const Map<String, String> headers = {
+    'Content-Type': 'application/json',
+  };
+}
+
+// Flutter Auth Provider - lib/providers/auth_provider.dart
+import 'dart:convert';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../config/api_config.dart';
+
+class AuthProvider with ChangeNotifier {
+  String? _token;
+  String? _refreshToken;
+  DateTime? _expiryDate;
+  String? _userId;
+  String? _userType;
+  Timer? _authTimer;
+  
+  bool get isAuth {
+    return token != null;
+  }
+  
+  bool get isFarmer {
+    return _userType == 'farmer';
+  }
+  
+  String? get token {
+    if (_expiryDate != null && 
+        _expiryDate!.isAfter(DateTime.now()) && 
+        _token != null) {
+      return _token;
+    }
+    return null;
+  }
+  
+  String? get userId {
+    return _userId;
+  }
+  
+  Future<void> _authenticate(
+    String email, 
+    String password, 
+    String urlSegment
+  ) async {
+    final url = '${ApiConfig.baseUrl}/api/token/';
+    
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: ApiConfig.headers,
+        body: json.encode({
+          'username': email,
+          'password': password,
+        }),
+      );
+      
+      final responseData = json.decode(response.body);
+      
+      if (response.statusCode >= 400) {
+        throw Exception(responseData['detail'] ?? 'Authentication failed');
+      }
+      
+      _token = responseData['access'];
+      _refreshToken = responseData
